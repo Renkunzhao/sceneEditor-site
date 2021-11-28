@@ -4,13 +4,17 @@
 <head>
   <meta charset="utf-8" />
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+
   <script src="https://threejs.org/build/three.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"
     integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-  <script type="text/javascript"
-    src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
-  <script type="text/javascript" src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+  <script src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+  <script src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
   <script type="text/javascript" src="lib/ros3d.js"></script>
+  <script type="text/javascript" src="scripts/__init__.js"></script>
+  <script type="text/javascript" src="scripts/file.js"></script>
   <script type="text/javascript" src="scripts/mouse.js"></script>
   <script type="text/javascript" src="scripts/region.js"></script>
 
@@ -23,55 +27,6 @@
     var mouseHandler, regionEditor;
     var raycaster = new THREE.Raycaster();
     var mouse = new THREE.Vector2();
-    function init() {
-
-      // Connect to ROS.
-      var ros = new ROSLIB.Ros({
-        url: 'ws://192.168.1.199:9090'
-      });
-
-      // Create the main viewer.
-      viewer = new ROS3D.Viewer({
-        divID: 'markers',
-        width: 400,
-        height: 300,
-        antialias: true,
-        cameraPose: {
-          x: 0,
-          y: 0,
-          z: 50
-        }
-      });
-      // viewer.addObject(new ROS3D.Grid(), true);
-      canvas = viewer.renderer.domElement;
-      canvas.addEventListener('click', PosCatch, false);
-
-      // Setup a client to listen to TFs.
-      var tfClient = new ROSLIB.TFClient({
-        ros: ros,
-        angularThres: 0.01,
-        transThres: 0.01,
-        rate: 10.0,
-        fixedFrame: '/my_frame'
-      });
-
-      // Setup the marker client.
-      markerClient = new ROS3D.MarkerClient({
-        ros: ros,
-        tfClient: tfClient,
-        topic: '/visualization_marker',
-        rootObject: viewer.scene
-      });
-
-      mouseHandler = new MouseHandler();
-      regionEditor = new RegionEditor();
-      $("#interact").click(function(){
-            mouseHandler.mousemod = MOUSEMOD.Interact;
-      })
-      $("#regionSet").click(function(){
-            mouseHandler.mousemod = MOUSEMOD.RegionSet;
-      })
-    }
     function OrbitReset() {
 
     }
@@ -112,14 +67,40 @@
   </script>
 </head>
 
-<body onload="init()">
+<body onload="__init__()">
   <h1>Simple Marker Example</h1>
+  <div class="ui dropdown" id="file">
+    <i class="folder icon"></i>
+    <div class="text">File</div>
+    <i class="dropdown icon"></i>
+    <div class="menu">
+      <div class="item">New</div>
+      <div class="item">
+        <span class="description">ctrl + o</span>
+        Open...
+        <i class="dropdown icon"></i>
+        <div class="menu">
+          <div class="item">scene_config.pb.txt</div>
+          <div class="item">scene_config1.pb.txt</div>
+        </div>
+      </div>
+      <div class="item">
+        <span class="description">ctrl + r</span>
+        Save
+      </div>
+      <div class="item">
+        <span class="description">ctrl + shift + s</span>
+        Save as...
+      </div>
+    </div>
+  </div>
   <div id="markers" style="text-align: center;"></div>
   <input type="button" value="Interact" id="interact">
   <button onclick="OrbitReset()">重置视角</button>
   <button onclick="PlaneZ()">生成z=0平面</button>
   <button onclick="MarkerList()">test</button>
   <button onclick="move()">移动</button>
+  <input type="file"></input>
   <form class="RegionEditor">
     RegionEditor<br>
     p1: <input type="text" id="p1"><br>

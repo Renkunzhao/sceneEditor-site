@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+  <link rel="stylesheet" href="css/sceneEditor.css">
+
+  <script src="https://threejs.org/build/three.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+  <script src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+  <script src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+  <script type="text/javascript" src="lib/ros3d.js"></script>
+  <script type="text/javascript" src="scripts/__init__.js"></script>
+  <script type="text/javascript" src="scripts/file.js"></script>
+  <script type="text/javascript" src="scripts/mouse.js"></script>
+  <script type="text/javascript" src="scripts/region.js"></script>
+
+  <script type="text/javascript" type="text/javascript">
+    /**
+     * Setup all visualization elements when the page is loaded.
+     */
+    var viewer, canvas;
+    var markerClient, selected;
+    var mouseHandler, regionEditor;
+    var raycaster = new THREE.Raycaster();
+    var mouse = new THREE.Vector2();
+    function OrbitReset() {
+
+    }
+    function PosCatch(event) {
+      var rect = canvas.getBoundingClientRect();
+      var x = event.clientX - rect.left * (canvas.width / rect.width);
+      var y = event.clientY - rect.top * (canvas.height / rect.height);
+      // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+      mouse.x = (x / canvas.width) * 2 - 1;
+      mouse.y = - (y / canvas.height) * 2 + 1;
+      console.log(mouse.x, mouse.y);
+      // 通过摄像机和鼠标位置更新射线
+      raycaster.setFromCamera(mouse, viewer.camera);
+      // 计算物体和射线的焦点
+      var intersects = raycaster.intersectObjects(viewer.scene.children);
+      console.log(intersects.length);
+      for (var i = 0; i < intersects.length; i++) {
+        intersects[i].object.material.color.set(0xff0000);
+        console.log(intersects[i]);
+        selected = intersects[i].object;
+      }
+    }
+    // 平面模型
+    function PlaneZ() {
+      var geometry = new THREE.PlaneGeometry(20, 20);
+      var material = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
+      var plane = new THREE.Mesh(geometry, material);
+      viewer.addObject(plane);
+    }
+    function move() {
+      for (marker in markerClient.markers) {
+        selected.translateX(2);
+      }
+    }
+    function MarkerList() {
+      console.log(markerClient.markers)
+    }
+  </script>
+</head>
+
+<body onload="__init__()">
+  <div class="ui main container">
+    <h1 class="ui header">
+      <i class="settings icon"></i>
+      <div class="content">Scene Editor <div class="sub header">This Web helps you config scene file for simulation easily.</div>
+      </div>
+    </h1>
+  </div>
+  <div class="ui divider"></div>
+
+  <div class="ui dropdown" id="file">
+    <i class="folder icon"></i>
+    <div class="text">File</div>
+    <i class="dropdown icon"></i>
+    <div class="menu">
+      <div class="item">New</div>
+      <div class="item">
+        <span class="description">ctrl + o</span>
+        Open...
+        <i class="dropdown icon"></i>
+        <div class="menu">
+          <div class="item">scene_config.pb.txt</div>
+          <div class="item">scene_config1.pb.txt</div>
+        </div>
+      </div>
+      <div class="item">
+        <span class="description">ctrl + r</span>
+        Save
+      </div>
+      <div class="item">
+        <span class="description">ctrl + shift + s</span>
+        Save as...
+      </div>
+    </div>
+  </div>
+
+  <div class="ui modal">
+    <i class="close icon"></i>
+    <div class="header">
+      Edit File Name
+    </div>
+    <div class="content">
+      <div class="ui fluid right labeled input">
+        <input type="text" placeholder="file name...">
+        <div class="ui basic label">
+          .pb.txt
+        </div>
+      </div>
+    </div>    
+    <div class="actions">
+      <div class="ui black deny button">
+        Cancel
+      </div>
+      <div class="ui positive right labeled icon button">
+        Save
+        <i class="checkmark icon"></i>
+      </div>
+    </div>
+  </div>
+
+  <button class="ui button" id="interact">Interact</button>
+  <button class="ui button" onclick="OrbitReset()">重置视角</button>
+  <button class="ui button" onclick="PlaneZ()">生成z=0平面</button>
+  <button class="ui button" onclick="MarkerList()">test</button>
+  <button class="ui button" onclick="move()">移动</button>
+  <div class="ui divider"></div>
+
+  <div class="ui internally celled grid">
+    <div class="row">
+      <div class="three wide column">
+        <form class="ui form" id="RegionEditor">
+          <h4 class="ui dividing header">Reachregion Editor</h4>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">p1</div>
+              <input type="text">
+            </div>
+          </div>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">p2</div>
+              <input type="text">
+            </div>
+          </div>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">p3</div>
+              <input type="text">
+            </div>
+          </div>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">p4</div>
+              <input type="text">
+            </div>
+          </div>
+          <button class="ui button" type="submit">Set</button>
+        </form>
+        <div class="ui divider"></div>
+        <form class="ui form" id="EgoEditor">
+          <h4 class="ui dividing header">Egocar Editor</h4>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">pos</div>
+              <input type="text">
+            </div>
+          </div>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">theta</div>
+              <input type="text">
+            </div>
+          </div>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">vel</div>
+              <input type="text">
+            </div>
+          </div>
+          <button class="ui button" type="submit">Start</button>
+          <button class="ui button" type="submit">End</button>
+        </form>
+      </div>
+      <div class="ten wide column">
+        <div id="markers" style="text-align: center;"></div>
+      </div>
+      <div class="three wide column">
+        <form class="ui form" id="EgoEditor">
+          <h4 class="ui dividing header">Obstacle Editor</h4>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">id</div>
+              <input type="text">
+            </div>
+          </div>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">pos</div>
+              <input type="text">
+            </div>
+          </div>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">scale</div>
+              <input type="text">
+            </div>
+          </div>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">theta</div>
+              <input type="text">
+            </div>
+          </div>
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">vel</div>
+              <input type="text">
+            </div>
+          </div>
+          <button class="ui button" type="submit">Add</button>
+          <button class="ui button" type="submit">Select</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="three wide column">
+        <img>
+      </div>
+      <div class="ten wide column">
+        <p></p>
+      </div>
+      <div class="three wide column">
+        <img>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

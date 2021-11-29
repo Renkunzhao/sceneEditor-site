@@ -8,8 +8,8 @@ function __init__() {
     // Create the main viewer.
     viewer = new ROS3D.Viewer({
       divID: 'markers',
-      width: 400,
-      height: 300,
+      width: 800,
+      height: 500,
       antialias: true,
       cameraPose: {
         x: 0,

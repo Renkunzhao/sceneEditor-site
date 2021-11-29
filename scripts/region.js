@@ -3,7 +3,7 @@ class RegionEditor {
     constructor() {
         this.regionPtr = 1;
 
-        $(".RegionEditor").keypress(function(event){
+        $("#RegionEditor").keypress(function(event){
             console.log(event.key);
             if(event.key=='Enter'){
                 console.log("Sending modified message...");

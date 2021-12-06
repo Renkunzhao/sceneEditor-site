@@ -1,6 +1,7 @@
 class ObstacleEditor {
     constructor(ros) {
         this.obstacleMod = ObstacleMod.Select;
+        this.select = undefined;
         this.obstaclePub = new ROSLIB.Topic({
             ros: ros,
             name: '/obstacle',
@@ -9,6 +10,7 @@ class ObstacleEditor {
         this.obstacles = new ROSLIB.Message({
             markers: []
         });
+
         var obstacle = JSON.parse(JSON.stringify(MarkerMsg));
         for (var i = 0; i < 10; i++) {
             obstacle.id = i;
@@ -46,6 +48,7 @@ class ObstacleEditor {
 
     obstacleSelect(event, mouseHandler){
         console.log("This is ObstacleEditor.obstacleSelect function.")
+        this.select = mouseHandler.objectCatch(0);
     }
 }
 

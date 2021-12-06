@@ -18,8 +18,8 @@ function __init__() {
     }
   });
   viewer.addObject(new ROS3D.Grid(), true);
+  viewer.cameraControls.rotateLeft(Math.PI/2)
   canvas = viewer.renderer.domElement;
-  canvas.addEventListener('click', processMouseEvent);
 
   // Setup a client to listen to TFs.
   var tfClient = new ROSLIB.TFClient({
@@ -49,19 +49,10 @@ function __init__() {
   obstacleEditor = new ObstacleEditor(ros);
   regionEditor = new RegionEditor();
 
-  $("#interact").click(function () {
-    mouseHandler.mouseMod = MouseMod.Interact;
-  })
-  $("#regionSet").click(function () {
-    mouseHandler.mouseMod = MouseMod.Region;
-  })
-
-  $("#obstacle_add").click(function () {
-    mouseHandler.mouseMod = MouseMod.Obstacle;
-    obstacleEditor.obstacleMod = ObstacleMod.Add;
-  })
+  canvas.addEventListener('click', processMouseEvent, false);
 
   function processMouseEvent(event) {
+    console.log(event);
     switch (mouseHandler.mouseMod) {
       case MouseMod.Interact:
         console.log("Interact mod...");
@@ -78,4 +69,42 @@ function __init__() {
         break;
     }
   }
+
+  window.addEventListener("keydown", (event) => {
+    console.log("Keydown.");
+    if (event.isComposing || event.code === 229) {
+      return;
+    }
+    if(event.key == "Control"){
+      mouseHandler.mouseMod = MouseMod.Obstacle;
+      obstacleEditor.obstacleMod = ObstacleMod.Select;
+    }
+  });
+
+  window.addEventListener("keyup", (event) => {
+    console.log("Keyup.");
+    if (event.isComposing || event.code === 229) {
+      return;
+    }
+    if(event.key == "Control"){
+      mouseHandler.mouseMod = MouseMod.Interact;
+    }
+  });
+
+  $("#interact").click(function () {
+    mouseHandler.mouseMod = MouseMod.Interact;
+  })
+  $("#regionSet").click(function () {
+    mouseHandler.mouseMod = MouseMod.Region;
+  })
+  $("#obstacle_add").click(function () {
+    mouseHandler.mouseMod = MouseMod.Obstacle;
+    obstacleEditor.obstacleMod = ObstacleMod.Add;
+  })
+  $("#obstacle_select").click(function () {
+    mouseHandler.mouseMod = MouseMod.Obstacle;
+    obstacleEditor.obstacleMod = ObstacleMod.Select;
+  })
+
+
 }

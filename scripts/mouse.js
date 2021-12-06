@@ -7,11 +7,11 @@ class MouseHandler {
         this.raycaster = new THREE.Raycaster();
         this.pos = new THREE.Vector3();
 
-        this.canvas.addEventListener('click', this.posCalculate.bind(this), false);
+        this.canvas.addEventListener('click', this.posCalculate.bind(this));
     };
 
     posCalculate(event) {
-        console.log(this);
+        console.log("This is MouseHandler.posCalculate function.");
         var rect = canvas.getBoundingClientRect();
         var x = event.clientX - rect.left * (canvas.width / rect.width);
         var y = event.clientY - rect.top * (canvas.height / rect.height);
@@ -31,14 +31,18 @@ class MouseHandler {
         this.raycaster.ray.intersectPlane(groundplane, this.pos);
         console.log(this.pos);
 
-        // // 计算物体和射线的焦点
-        // var intersects = raycaster.intersectObjects(this.viewer.scene.children);
-        // console.log(intersects.length);
-        // for (var i = 0; i < intersects.length; i++) {
-        //   intersects[i].object.material.color.set(0xff0000);
-        //   console.log(intersects[i]);
-        //   selected = intersects[i].object;
-        // }
+    }
+
+    objectCatch(layer){
+        this.raycaster.layers.set(layer);
+        // 计算物体和射线的焦点
+        var intersects = this.raycaster.intersectObjects(this.viewer.scene.children);
+        console.log(intersects.length);
+        for (var i = 0; i < intersects.length; i++) {
+          intersects[i].object.material.color.set(0xff0000);
+          console.log(intersects[i]);
+        }
+        return intersects[0].object;
     }
 
 }
